@@ -52,12 +52,50 @@ public class ParkingSpotController {
 
     @GetMapping("find-by-id/{id}")
     public ResponseEntity<Object> getOneParkingSpot(@PathVariable(value = "id")UUID id){
-        Optional<ParkingSpotModel> parkingSpotModelOptional = parkingSpotModelOptional = parkingSpotService.findById(id);
+        Optional<ParkingSpotModel> parkingSpotModelOptional  = parkingSpotService.findById(id);
         if(!parkingSpotModelOptional.isPresent()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking Spot não existe.");
 
         }
         return ResponseEntity.status((HttpStatus.OK)).body(parkingSpotModelOptional.get());
+    }
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Object> deleteParkingSpot(@PathVariable(value = "id") UUID id){
+        Optional<ParkingSpotModel> parkingSpotModelOptional = parkingSpotService.findById(id);
+        if (!parkingSpotModelOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking Spot não existe.");
+        }
+        parkingSpotService.deletar(parkingSpotModelOptional.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Parking Spot deletado com sucesso!");
+    }
+
+    @PutMapping("atualizar/{id}")
+    public ResponseEntity<Object> updateParkingSpot(@PathVariable(value = "id") UUID id, @RequestBody @Valid ParkingSpotDTO parkingSpotDTO){
+        Optional<ParkingSpotModel> parkingSpotModelOptional = parkingSpotService.findById(id);
+        if (parkingSpotModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking Spot não existe.");
+        }
+        var parkingSpotModel = new ParkingSpotModel();
+        BeanUtils.copyProperties(parkingSpotDTO, parkingSpotModel);
+        parkingSpotModel.setId(parkingSpotModelOptional.get().getId());
+        parkingSpotModel.setRegistrationDate(parkingSpotModelOptional.get().getRegistrationDate());
+        return ResponseEntity.status(HttpStatus.OK).body(parkingSpotService.salvar(parkingSpotModel));
+
+
+//        var parkingSpotModel = new ParkingSpotModel();  <- não precisa criar um novo objeto, pois o Optional já retorna um objeto
+//        var parkingSpotModel = parkingSpotModelOptional.get();
+//        parkingSpotModel.setParkingSpotNumber(parkingSpotDTO.getParkingSpotNumber());
+//        parkingSpotModel.setLicensePlateCar(parkingSpotDTO.getLicensePlateCar());
+//        parkingSpotModel.setModelCar(parkingSpotModel.getModelCar());
+//        parkingSpotModel.setBrandCar(parkingSpotModel.getBrandCar());
+//        parkingSpotModel.setApartment(parkingSpotModel.getApartment());
+//        parkingSpotModel.setBlock(parkingSpotModel.getBlock());
+//        parkingSpotModel.setResponsibleName(parkingSpotModel.getResponsibleName());
+//        parkingSpotModel.setColorCar(parkingSpotModel.getColorCar());
+//        return ResponseEntity.status(HttpStatus.OK).body(parkingSpotService.salvar(parkingSpotModel));
+
+
+
     }
 
 }
